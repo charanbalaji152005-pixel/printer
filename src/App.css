@@ -1,0 +1,839 @@
+/* ==========================================================================
+   GLOBAL DESIGN TOKENS & RESET
+   ========================================================================== */
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  
+  --color-paper: #ffffff;
+  --color-paper-alt: #fdfdfd;
+  --color-ink-primary: #0f172a;
+  --color-ink-secondary: #475569;
+  --color-ink-muted: #94a3b8;
+  --color-ink-border: #e2e8f0;
+
+  --printer-width: 380px;
+  --receipt-width: 330px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background-color: #080a0e;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mono {
+  font-family: var(--font-mono) !important;
+}
+
+/* ==========================================================================
+   SCENE VIEWPORT & DARK BLURRED CAFÉ BACKGROUND
+   ========================================================================== */
+
+.scene-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px 64px;
+  overflow: hidden;
+}
+
+/* Photorealistic Dark Blurred Café Background */
+.cafe-backdrop-photo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/cafe-bg.jpg');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  filter: blur(18px) brightness(0.65) saturate(1.25);
+  transform: scale(1.08); /* prevents blur edges */
+  pointer-events: none;
+}
+
+/* Ambient moody vignette overlay */
+.cafe-ambient-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    circle at 50% 25%,
+    rgba(217, 119, 6, 0.12) 0%,
+    rgba(8, 10, 14, 0.6) 45%,
+    rgba(3, 5, 8, 0.88) 100%
+  );
+  pointer-events: none;
+}
+
+/* Gentle drifting bokeh glow orbs */
+.bokeh-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 1;
+  animation: floatOrb 12s ease-in-out infinite alternate;
+}
+
+.bokeh-orb-1 {
+  width: 280px;
+  height: 280px;
+  top: 10%;
+  left: 15%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0) 70%);
+}
+
+.bokeh-orb-2 {
+  width: 320px;
+  height: 320px;
+  bottom: 15%;
+  right: 15%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, rgba(30, 58, 138, 0) 70%);
+  animation-duration: 16s;
+  animation-delay: -6s;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(25px, -20px) scale(1.1); }
+  100% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+/* ==========================================================================
+   PRINTER & SHEET CONTAINER (CLEAN & CENTERED)
+   ========================================================================== */
+
+.printer-experience-frame {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: var(--printer-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.printer-assembly-stage {
+  position: relative;
+  width: 100%;
+  max-width: var(--printer-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.printer-chassis-wrapper {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  max-width: var(--printer-width);
+  cursor: default;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.printer-chassis-wrapper:hover {
+  transform: translateY(-1px);
+}
+
+/* 
+  Centered printer slot inline SVG with 380:60 aspect ratio, max-width 380px,
+  soft drop-shadow: 0 12px 24px rgba(15, 23, 42, 0.08)
+*/
+.printer-machine {
+  width: 100%;
+  max-width: var(--printer-width);
+  height: auto;
+  aspect-ratio: 380 / 60;
+  margin: 0 auto;
+  filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.08)) drop-shadow(0 18px 30px rgba(0, 0, 0, 0.6));
+  transform-origin: center top;
+  will-change: transform;
+}
+
+.printer-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 
+  REQUIREMENT 1:
+  Printer shakes while printing:
+  .printer-machine.is-printing { animation: printerVibe 0.08s infinite }
+  with keyframes 0%/100% translate(0,0) rotate(0), 50% translate(-0.4px,0.4px) rotate(-0.05deg).
+*/
+@keyframes printerVibe {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  50% {
+    transform: translate(-0.4px, 0.4px) rotate(-0.05deg);
+  }
+}
+
+.printer-machine.is-printing {
+  animation: printerVibe 0.08s infinite;
+}
+
+/* LED pulse during printing */
+.led-pulsing {
+  animation: ledPulse 0.4s alternate infinite ease-in-out;
+}
+
+@keyframes ledPulse {
+  from { opacity: 0.5; filter: drop-shadow(0 0 1px #38bdf8); }
+  to { opacity: 1; filter: drop-shadow(0 0 6px #38bdf8); }
+}
+
+/* ==========================================================================
+   PAPER CHUTE & RECEIPT SLIDING OUT (3D TRANSLATE Y)
+   ========================================================================== */
+
+/* 
+  The paper chute starts right behind the cutter blade.
+  clip-path clips anything above top: 0 (inside the printer machine)
+  while letting the paper slide down and tear away off-screen!
+*/
+.paper-chute-viewport {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--printer-width);
+  /* Top aligns right with printer slot mouth at y=43px of 60px (71.6%) */
+  margin-top: -18px;
+  padding-top: 1px;
+  overflow: visible;
+  clip-path: inset(0px -80px -120vh -80px);
+  perspective: 1200px;
+}
+
+.receipt-slot-carriage {
+  position: relative;
+  width: 100%;
+  max-width: var(--receipt-width);
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  /* Drop shadow wraps the clipped zig-zag teeth perfectly */
+  filter:
+    drop-shadow(0 20px 32px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+}
+
+/* 
+  REQUIREMENT 2:
+  A white paper receipt with a zig-zag torn bottom edge slides smoothly 
+  out of the slot (translateY, ease-out, ~1.5s, transform-style: preserve-3d).
+*/
+.carriage-printing {
+  animation: slideOutFromSlot 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-style: preserve-3d;
+}
+
+@keyframes slideOutFromSlot {
+  0% {
+    transform: translateY(-94%) translateZ(0);
+    opacity: 0.95;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) translateZ(0);
+    opacity: 1;
+  }
+}
+
+/* 
+  REQUIREMENT 4:
+  Holds for ~2s, then tears off: it rotates and falls away off-screen
+*/
+.carriage-holding {
+  transform: translateY(0) translateZ(0);
+  transform-style: preserve-3d;
+}
+
+.carriage-tearing {
+  animation: tearAndFallAway 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-style: preserve-3d;
+}
+
+@keyframes tearAndFallAway {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  14% {
+    /* Snappy initial micro tear angle */
+    transform: translateY(12px) rotate(-1.8deg) scale(0.995);
+    opacity: 0.99;
+  }
+  40% {
+    transform: translateY(160px) rotate(4deg) scale(0.98);
+    opacity: 0.95;
+  }
+  100% {
+    /* Rotates and falls away off-screen */
+    transform: translateY(115vh) rotate(16deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.carriage-resetting {
+  transform: translateY(-95%) translateZ(0);
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+/* ==========================================================================
+   RECEIPT PAPER STYLING & ZIG-ZAG TORN BOTTOM EDGE
+   ========================================================================== */
+
+.receipt-paper {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  color: var(--color-ink-primary);
+  padding: 24px 20px 28px;
+  /* Authentic subtle thermal paper texture */
+  background-image: 
+    linear-gradient(180deg, #ffffff 0%, #fafafa 100%),
+    radial-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 0);
+  background-size: 100% 100%, 4px 4px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+
+  /* 
+    ZIG-ZAG TORN BOTTOM EDGE
+    Crisp polygon teeth across the bottom edge
+  */
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% calc(100% - 9px),
+    96.875% 100%, 93.75% calc(100% - 9px),
+    90.625% 100%, 87.5% calc(100% - 9px),
+    84.375% 100%, 81.25% calc(100% - 9px),
+    78.125% 100%, 75% calc(100% - 9px),
+    71.875% 100%, 68.75% calc(100% - 9px),
+    65.625% 100%, 62.5% calc(100% - 9px),
+    59.375% 100%, 56.25% calc(100% - 9px),
+    53.125% 100%, 50% calc(100% - 9px),
+    46.875% 100%, 43.75% calc(100% - 9px),
+    40.625% 100%, 37.5% calc(100% - 9px),
+    34.375% 100%, 31.25% calc(100% - 9px),
+    28.125% 100%, 25% calc(100% - 9px),
+    21.875% 100%, 18.75% calc(100% - 9px),
+    15.625% 100%, 12.5% calc(100% - 9px),
+    9.375% 100%, 6.25% calc(100% - 9px),
+    3.125% 100%, 0% calc(100% - 9px)
+  );
+}
+
+/* Subtle thermal curl gradient at the top edge */
+.receipt-paper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   RECEIPT CONTENT LAYOUT
+   ========================================================================== */
+
+/* 1. BRAND HEADER */
+.receipt-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.receipt-logo-container {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.brand-logo-svg {
+  width: 44px;
+  height: 44px;
+}
+
+.apple-logo-svg {
+  width: 34px;
+  height: 34px;
+}
+
+.receipt-brand-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.receipt-subtitle {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+/* 2. PRIMARY STATS GRID */
+.receipt-stats-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.stat-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-column-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* Small-caps labels */
+.small-caps-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.stat-value-mono {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.stat-value-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+/* 3. DATE & TIME & STATUS ROW */
+.receipt-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.meta-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-datetime {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.meta-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Status Pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* 4. DASHED DIVIDER WITH SIDE TICKET NOTCHES */
+.dashed-ticket-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 14px -20px;
+  height: 16px;
+}
+
+.ticket-punch-notch {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #080a0e;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4) inset;
+}
+
+.notch-left {
+  left: -8px;
+}
+
+.notch-right {
+  right: -8px;
+}
+
+.dashed-line {
+  width: 100%;
+  height: 1px;
+  background-image: linear-gradient(to right, #cbd5e1 50%, rgba(255, 255, 255, 0) 0%);
+  background-position: top;
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+.sub-divider {
+  margin: 12px 0;
+}
+
+.sub-divider .dashed-line {
+  background-size: 6px 1px;
+}
+
+/* 5. ITEM BREAKDOWN LIST */
+.receipt-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.receipt-item-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.item-qty {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.item-name {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.receipt-meta-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  padding: 2px 0;
+}
+
+.meta-info-value {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Subtotals */
+.receipt-subtotals {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.subtotal-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.subtotal-value {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* 6. PAYMENT SECTION */
+.receipt-payment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.receipt-payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.payment-card-badge {
+  display: flex;
+  align-items: center;
+}
+
+/* Card Icons */
+.card-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.visa-icon {
+  background: #1a1f71;
+  color: #ffffff;
+}
+
+.visa-text {
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.mc-icon {
+  position: relative;
+  width: 28px;
+  height: 18px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-circle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.mc-red {
+  background: #eb001b;
+  left: 3px;
+}
+
+.mc-yellow {
+  background: #f79e1b;
+  right: 3px;
+  opacity: 0.9;
+}
+
+.applepay-icon {
+  background: #000000;
+  color: #ffffff;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ap-apple-logo {
+  width: 10px;
+  height: 10px;
+}
+
+.applepay-text {
+  font-weight: 600;
+  font-size: 0.65rem;
+}
+
+.cardholder-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cardholder-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1e293b;
+}
+
+.card-digits {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* 7. BARCODE & QR CODE SECTION */
+.receipt-code-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0 14px;
+}
+
+.receipt-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.receipt-barcode-svg {
+  width: 85%;
+  height: 38px;
+}
+
+.receipt-code-caption {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.receipt-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-wrapper {
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.receipt-qr-svg {
+  width: 72px;
+  height: 72px;
+}
+
+/* 8. TINY FOOTER LINE */
+.receipt-footer {
+  text-align: center;
+  padding-top: 6px;
+}
+
+.tiny-footer-text {
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.receipt-auth-watermark {
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.receipt-bottom-torn-indicator {
+  height: 6px;
+}
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE REFINEMENTS (720×1562 & Small Screens)
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .scene-viewport {
+    padding: 32px 10px 40px;
+  }
+
+  .printer-experience-frame {
+    max-width: 100%;
+  }
+
+  .printer-machine {
+    max-width: 350px;
+  }
+
+  .receipt-slot-carriage {
+    max-width: 310px;
+  }
+
+  .receipt-paper {
+    padding: 20px 16px 24px;
+  }
+
+  .receipt-brand-title {
+    font-size: 1.05rem;
+  }
+
+  .receipt-barcode-svg {
+    height: 32px;
+  }
+
+  .receipt-qr-svg {
+    width: 64px;
+    height: 64px;
+  }
+}
